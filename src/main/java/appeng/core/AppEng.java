@@ -48,7 +48,8 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import team.chisel.ctm.CTM;
-
+import com.gamerforea.ae.EventConfig;
+import com.gamerforea.eventhelper.config.ConfigUtils;
 import appeng.api.AEApi;
 import appeng.core.crash.CrashInfo;
 import appeng.core.crash.IntegrationCrashEnhancement;
@@ -146,6 +147,10 @@ public final class AppEng
 
 		AEConfig.init( configFile );
 		FacadeConfig.init( facadeFile );
+
+		// TODO gamerforEA code start
+		ConfigUtils.readConfig(EventConfig.class);
+		// TODO gamerforEA code end
 
 		final VersionCheckerConfig versionCheckerConfig = new VersionCheckerConfig( versionFile );
 		this.exportConfig = new ForgeExportConfig( recipeConfiguration );

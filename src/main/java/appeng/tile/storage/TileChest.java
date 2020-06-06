@@ -40,8 +40,9 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.api.AEApi;
 import appeng.api.config.AccessRestriction;
 import appeng.api.config.Actionable;
@@ -104,6 +105,7 @@ import appeng.util.inv.InvOperation;
 import appeng.util.inv.WrapperChainedItemHandler;
 import appeng.util.inv.filter.IAEItemFilter;
 import appeng.util.item.AEItemStack;
+import net.minecraftforge.items.wrapper.EmptyHandler;
 
 
 public class TileChest extends AENetworkPowerTile implements IMEChest, ITerminalHost, IPriorityHost, IConfigManagerHost, IColorableTile, ITickable
@@ -802,23 +804,32 @@ public class TileChest extends AENetworkPowerTile implements IMEChest, ITerminal
 		{
 			return true;
 		}
+		// TODO gamerforEA code start
+		if (EventConfig.chestDriveDenyAutoInsertExtract && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			return false;
+		// TODO gamerforEA code end
 		return super.hasCapability( capability, facing );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getCapability( Capability<T> capability, @Nullable EnumFacing facing )
+	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 	{
 		this.updateHandler();
-		if( capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && this.fluidHandler != null && facing != this.getForward() )
-		{
+		if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && this.fluidHandler != null && facing != this.getForward())
 			return (T) this.fluidHandler;
-		}
-		if( capability == Capabilities.STORAGE_MONITORABLE_ACCESSOR && this.accessor != null && facing != this.getForward() )
-		{
+		if (capability == Capabilities.STORAGE_MONITORABLE_ACCESSOR && this.accessor != null && facing != this.getForward())
 			return (T) this.accessor;
-		}
-		return super.getCapability( capability, facing );
+
+		T value = super.getCapability(capability, facing);
+
+		// TODO gamerforEA code start
+		if (EventConfig.chestDriveDenyAutoInsertExtract && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			if (value != null && value != EmptyHandler.INSTANCE)
+				return (T) EmptyHandler.INSTANCE;
+		// TODO gamerforEA code end
+
+		return value;
 	}
 
 	private class Accessor implements IStorageMonitorableAccessor

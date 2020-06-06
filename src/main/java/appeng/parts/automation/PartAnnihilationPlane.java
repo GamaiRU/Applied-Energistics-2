@@ -36,7 +36,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.api.AEApi;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
@@ -426,6 +426,14 @@ public class PartAnnihilationPlane extends PartBasicState implements IGridTickab
 					{
 						if( modulate )
 						{
+							// TODO gamerforEA code start
+							if (EventConfig.annihilationPlaneBlackList.contains(w.getBlockState(pos)))
+								return TickRateModulation.IDLE;
+
+							if (this.fake.cantBreak(pos))
+								return TickRateModulation.IDLE;
+							// TODO gamerforEA code end
+
 							energy.extractAEPower( requiredPower, Actionable.MODULATE, PowerMultiplier.CONFIG );
 							this.breakBlockAndStoreItems( w, pos );
 							AppEng.proxy.sendToAllNearExcept( null, pos.getX(), pos.getY(), pos.getZ(), 64, w,

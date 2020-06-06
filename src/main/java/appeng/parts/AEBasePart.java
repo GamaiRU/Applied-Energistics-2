@@ -46,7 +46,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.IItemHandler;
-
+import com.gamerforea.ae.ModUtils;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import appeng.api.AEApi;
 import appeng.api.config.Upgrades;
 import appeng.api.definitions.IDefinitions;
@@ -76,6 +77,8 @@ import appeng.tile.inventory.AppEngInternalAEInventory;
 import appeng.util.Platform;
 import appeng.util.SettingsFrom;
 
+import javax.annotation.Nonnull;
+
 
 public abstract class AEBasePart implements IPart, IGridProxyable, IActionHost, IUpgradeableHost, ICustomNameObject
 {
@@ -85,6 +88,18 @@ public abstract class AEBasePart implements IPart, IGridProxyable, IActionHost, 
 	private TileEntity tile = null;
 	private IPartHost host = null;
 	private AEPartLocation side = null;
+
+	// TODO gamerforEA code start
+	public final FakePlayerContainer fake = new FakePlayerContainer(ModUtils.NEXUS_FACTORY.getProfile())
+	{
+		@Nonnull
+		@Override
+		public World getWorld()
+		{
+			return AEBasePart.this.getTile().getWorld();
+		}
+	};
+	// TODO gamerforEA code end
 
 	public AEBasePart( final ItemStack is )
 	{
@@ -237,12 +252,20 @@ public abstract class AEBasePart implements IPart, IGridProxyable, IActionHost, 
 	public void readFromNBT( final NBTTagCompound data )
 	{
 		this.proxy.readFromNBT( data );
+
+		// TODO gamerforEA code start
+		this.fake.readFromNBT(data);
+		// TODO gamerforEA code end
 	}
 
 	@Override
 	public void writeToNBT( final NBTTagCompound data )
 	{
 		this.proxy.writeToNBT( data );
+
+		// TODO gamerforEA code start
+		this.fake.writeToNBT(data);
+		// TODO gamerforEA code end
 	}
 
 	@Override

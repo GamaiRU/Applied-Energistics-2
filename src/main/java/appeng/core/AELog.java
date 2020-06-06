@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 
 import net.minecraft.util.math.BlockPos;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.core.features.AEFeature;
 import appeng.tile.AEBaseTile;
 import appeng.util.Platform;
@@ -88,7 +88,10 @@ public final class AELog
 	{
 		if( AELog.isLogEnabled() )
 		{
-			final String formattedMessage = String.format( message, params );
+			// TODO gamerforEA code replace, old code:
+			// final String formattedMessage = String.format(message, params);
+			final String formattedMessage = EventConfig.fixLogFormatting && params.length == 0 ? message : String.format(message, params);
+			// TODO gamerforEA code end
 			final Logger logger = getLogger();
 
 			logger.log( level, formattedMessage );
@@ -111,7 +114,10 @@ public final class AELog
 	{
 		if( AELog.isLogEnabled() )
 		{
-			final String formattedMessage = String.format( message, params );
+			// TODO gamerforEA code replace, old code:
+			// final String formattedMessage = String.format(message, params);
+			final String formattedMessage = EventConfig.fixLogFormatting && params.length == 0 ? message : String.format(message, params);
+			// TODO gamerforEA code end
 			final Logger logger = getLogger();
 
 			logger.log( level, formattedMessage, exception );

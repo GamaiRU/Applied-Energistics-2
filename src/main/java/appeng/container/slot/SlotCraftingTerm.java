@@ -33,7 +33,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.api.AEApi;
 import appeng.api.config.Actionable;
 import appeng.api.networking.energy.IEnergySource;
@@ -130,6 +130,10 @@ public class SlotCraftingTerm extends AppEngCraftingSlot
 		}
 
 		maxTimesToCraft = this.capCraftingAttempts( maxTimesToCraft );
+
+		// TODO gamerforEA code start
+		maxTimesToCraft = Math.min(maxTimesToCraft, EventConfig.craftTermMaxTimesToCraft);
+		// TODO gamerforEA code end
 
 		if( ia == null )
 		{

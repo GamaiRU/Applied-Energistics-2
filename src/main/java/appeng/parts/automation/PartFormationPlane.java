@@ -45,7 +45,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.items.IItemHandler;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.api.AEApi;
 import appeng.api.config.AccessRestriction;
 import appeng.api.config.Actionable;
@@ -251,8 +251,19 @@ public class PartFormationPlane extends PartAbstractFormationPlane<IAEItemStack>
 				worked = true;
 				if( type == Actionable.MODULATE )
 				{
+					EnumFacing interactSide = side.getFacing().getOpposite();
+
+					// TODO gamerforEA code start
+					if (EventConfig.formationPlaneBlackList.contains(is) || this.fake.cantInteract(hand, tePos, interactSide))
+					{
+						player.setHeldItem(hand, ItemStack.EMPTY);
+						return input;
+					}
+					// TODO gamerforEA code end
+
 					if( i instanceof IPlantable || i instanceof ItemSkull || i == Item.getItemFromBlock( Blocks.REEDS ) )
 					{
+
 						boolean Worked = false;
 
 						if( side.xOffset == 0 && side.zOffset == 0 )
@@ -333,6 +344,9 @@ public class PartFormationPlane extends PartAbstractFormationPlane<IAEItemStack>
 						if( !w.spawnEntity( result ) )
 						{
 							result.setDead();
+							// TODO gamerforEA code start
+							if (EventConfig.formationPlaneDropCheck)
+							// TODO gamerforEA code end
 							worked = false;
 						}
 					}

@@ -30,7 +30,7 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.block.AEBaseTileBlock;
 import appeng.tile.networking.TileController;
 
@@ -98,7 +98,7 @@ public class BlockController extends AEBaseTileBlock
 	 * get a rudimentary connected texture feel for the controller based on how it is placed.
 	 */
 	@Override
-	public IBlockState getActualState( IBlockState state, IBlockAccess world, BlockPos pos )
+	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos)
 	{
 
 		// Only used for columns, really
@@ -109,42 +109,35 @@ public class BlockController extends AEBaseTileBlock
 		int z = pos.getZ();
 
 		// Detect whether controllers are on both sides of the x, y, and z axes
-		final boolean xx = this.getTileEntity( world, x - 1, y, z ) instanceof TileController && this.getTileEntity( world, x + 1, y,
-				z ) instanceof TileController;
-		final boolean yy = this.getTileEntity( world, x, y - 1, z ) instanceof TileController && this.getTileEntity( world, x, y + 1,
-				z ) instanceof TileController;
-		final boolean zz = this.getTileEntity( world, x, y, z - 1 ) instanceof TileController && this.getTileEntity( world, x, y,
-				z + 1 ) instanceof TileController;
+		/* TODO gamerforEA code replace, old code:
+		final boolean xx = this.getTileEntity(world, x - 1, y, z) instanceof TileController && this.getTileEntity(world, x + 1, y, z) instanceof TileController;
+		final boolean yy = this.getTileEntity(world, x, y - 1, z) instanceof TileController && this.getTileEntity(world, x, y + 1, z) instanceof TileController;
+		final boolean zz = this.getTileEntity(world, x, y, z - 1) instanceof TileController && this.getTileEntity(world, x, y, z + 1) instanceof TileController; */
+		final boolean forceChunkLoad = EventConfig.chunkLoading;
+		final boolean xx = this.getTileEntity(world, x - 1, y, z, forceChunkLoad) instanceof TileController && this.getTileEntity(world, x + 1, y, z, forceChunkLoad) instanceof TileController;
+		final boolean yy = this.getTileEntity(world, x, y - 1, z, forceChunkLoad) instanceof TileController && this.getTileEntity(world, x, y + 1, z, forceChunkLoad) instanceof TileController;
+		final boolean zz = this.getTileEntity(world, x, y, z - 1, forceChunkLoad) instanceof TileController && this.getTileEntity(world, x, y, z + 1, forceChunkLoad) instanceof TileController;
+		// TODO gamerforEA code end
 
-		if( xx && !yy && !zz )
-		{
+		if (xx && !yy && !zz)
 			type = ControllerRenderType.column_x;
-		}
-		else if( !xx && yy && !zz )
-		{
+		else if (!xx && yy && !zz)
 			type = ControllerRenderType.column_y;
-		}
-		else if( !xx && !yy && zz )
-		{
+		else if (!xx && !yy && zz)
 			type = ControllerRenderType.column_z;
-		}
-		else if( ( xx ? 1 : 0 ) + ( yy ? 1 : 0 ) + ( zz ? 1 : 0 ) >= 2 )
+		else if ((xx ? 1 : 0) + (yy ? 1 : 0) + (zz ? 1 : 0) >= 2)
 		{
-			final int v = ( Math.abs( x ) + Math.abs( y ) + Math.abs( z ) ) % 2;
+			final int v = (Math.abs(x) + Math.abs(y) + Math.abs(z)) % 2;
 
 			// While i'd like this to be based on the blockstate randomization feature, this generates
 			// an alternating pattern based on world position, so this is not 100% doable with blockstates.
-			if( v == 0 )
-			{
+			if (v == 0)
 				type = ControllerRenderType.inside_a;
-			}
 			else
-			{
 				type = ControllerRenderType.inside_b;
-			}
 		}
 
-		return state.withProperty( CONTROLLER_TYPE, type );
+		return state.withProperty(CONTROLLER_TYPE, type);
 	}
 
 	@Override
@@ -173,12 +166,15 @@ public class BlockController extends AEBaseTileBlock
 	}
 
 	@Override
-	public void neighborChanged( IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos )
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos)
 	{
-		final TileController tc = this.getTileEntity( world, pos );
-		if( tc != null )
-		{
-			tc.onNeighborChange( false );
-		}
+		// TODO gamerforEA code replace, old code:
+		// final TileController tc = this.getTileEntity(world, pos);
+		final boolean forceChunkLoad = EventConfig.chunkLoading;
+		final TileController tc = this.getTileEntity(world, pos, forceChunkLoad);
+		// TODO gamerforEA code end
+
+		if (tc != null)
+			tc.onNeighborChange(false);
 	}
 }

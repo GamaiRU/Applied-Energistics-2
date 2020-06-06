@@ -46,7 +46,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.IItemHandler;
-
+import com.gamerforea.eventhelper.util.EventUtils;
 import appeng.api.AEApi;
 import appeng.api.config.Actionable;
 import appeng.api.config.FuzzyMode;
@@ -264,6 +264,11 @@ public class ToolMatterCannon extends AEBasePoweredItem implements IStorageCell<
 
 			if( pos.typeOfHit == RayTraceResult.Type.ENTITY )
 			{
+				// TODO gamerforEA code start
+				if (EventUtils.cantAttack(p, pos.entityHit))
+					return;
+				// TODO gamerforEA code end
+
 				final int id = pos.entityHit.getEntityId();
 				final PlayerColor marker = new PlayerColor( id, col, 20 * 30 );
 				TickHandler.INSTANCE.getPlayerColors().put( id, marker );
@@ -382,6 +387,10 @@ public class ToolMatterCannon extends AEBasePoweredItem implements IStorageCell<
 
 				if( pos.typeOfHit == RayTraceResult.Type.ENTITY )
 				{
+					// TODO gamerforEA code start
+					if (EventUtils.cantAttack(p, pos.entityHit))
+						return;
+					// TODO gamerforEA code end
 					final int dmg = (int) Math.ceil( penetration / 20.0f );
 					if( pos.entityHit instanceof EntityLivingBase )
 					{
@@ -423,6 +432,10 @@ public class ToolMatterCannon extends AEBasePoweredItem implements IStorageCell<
 						{
 							if( penetration > hardness && Platform.hasPermissions( new DimensionalCoord( w, pos.getBlockPos() ), p ) )
 							{
+								// TODO gamerforEA code start
+								if (EventUtils.cantBreak(p, pos.getBlockPos()))
+									return;
+								// TODO gamerforEA code end
 								hasDestroyed = true;
 								penetration -= hardness;
 								penetration *= 0.60;

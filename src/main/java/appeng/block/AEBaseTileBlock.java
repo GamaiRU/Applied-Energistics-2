@@ -47,7 +47,7 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.items.ItemHandlerHelper;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.api.implementations.items.IMemoryCard;
 import appeng.api.implementations.items.MemoryCardMessages;
 import appeng.api.implementations.tiles.IColorableTile;
@@ -133,26 +133,43 @@ public abstract class AEBaseTileBlock extends AEBaseBlock implements ITileEntity
 	{
 		return this.tileEntityType;
 	}
-
+	// TODO gamerforEA code start
 	@Nullable
-	public <T extends AEBaseTile> T getTileEntity( final IBlockAccess w, final int x, final int y, final int z )
+	public <T extends AEBaseTile> T getTileEntity(final IBlockAccess w, final int x, final int y, final int z)
 	{
-		return this.getTileEntity( w, new BlockPos( x, y, z ) );
+		return this.getTileEntity(w, x, y, z, true);
 	}
 
 	@Nullable
-	public <T extends AEBaseTile> T getTileEntity( final IBlockAccess w, final BlockPos pos )
+	public <T extends AEBaseTile> T getTileEntity(final IBlockAccess w, final BlockPos pos)
 	{
-		if( !this.hasBlockTileEntity() )
-		{
-			return null;
-		}
+		return this.getTileEntity(w, pos, true);
+	}
+	// TODO gamerforEA code end
 
-		final TileEntity te = w.getTileEntity( pos );
-		if( this.tileEntityType.isInstance( te ) )
-		{
+	@Nullable
+	// TODO gamerforEA add forceChunkLoad:boolean parameter
+	public <T extends AEBaseTile> T getTileEntity(final IBlockAccess w, final int x, final int y, final int z, final boolean forceChunkLoad)
+	{
+		// TODO gamerforEA add forceChunkLoad:boolean parameter
+		return this.getTileEntity(w, new BlockPos(x, y, z), forceChunkLoad);
+	}
+
+	@Nullable
+	// TODO gamerforEA add forceChunkLoad:boolean parameter
+	public <T extends AEBaseTile> T getTileEntity(final IBlockAccess w, final BlockPos pos, final boolean forceChunkLoad)
+	{
+		if (!this.hasBlockTileEntity())
+			return null;
+
+		// TODO gamerforEA code start
+		if (!forceChunkLoad && w instanceof World && !((World) w).isBlockLoaded(pos))
+			return null;
+		// TODO gamerforEA code end
+
+		final TileEntity te = w.getTileEntity(pos);
+		if (this.tileEntityType.isInstance(te))
 			return (T) te;
-		}
 
 		return null;
 	}

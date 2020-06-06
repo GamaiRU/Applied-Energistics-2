@@ -31,8 +31,11 @@ import io.netty.buffer.ByteBuf;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.api.AEApi;
 import appeng.api.implementations.tiles.IChestOrDrive;
 import appeng.api.networking.GridFlags;
@@ -62,6 +65,9 @@ import appeng.tile.inventory.AppEngCellInventory;
 import appeng.util.Platform;
 import appeng.util.inv.InvOperation;
 import appeng.util.inv.filter.IAEItemFilter;
+import net.minecraftforge.items.wrapper.EmptyHandler;
+
+import javax.annotation.Nullable;
 
 
 public class TileDrive extends AENetworkInvTile implements IChestOrDrive, IPriorityHost
@@ -102,6 +108,29 @@ public class TileDrive extends AENetworkInvTile implements IChestOrDrive, IPrior
 		this.inv.setFilter( new CellValidInventoryFilter() );
 		this.inventoryHandlers = new IdentityHashMap<>();
 	}
+
+	// TODO gamerforEA code start
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing)
+	{
+		if (EventConfig.chestDriveDenyAutoInsertExtract && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			return false;
+
+		return super.hasCapability(capability, facing);
+	}
+
+	@Override
+	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
+	{
+		T value = super.getCapability(capability, facing);
+
+		if (EventConfig.chestDriveDenyAutoInsertExtract && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			if (value != null && value != EmptyHandler.INSTANCE)
+				return (T) EmptyHandler.INSTANCE;
+
+		return value;
+	}
+	// TODO gamerforEA code end
 
 	@Override
 	protected void writeToStream( final ByteBuf data ) throws IOException

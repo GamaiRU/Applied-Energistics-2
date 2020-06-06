@@ -37,7 +37,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional.Interface;
 
 import cofh.api.item.IToolHammer;
-
+import com.gamerforea.eventhelper.util.EventUtils;
 import appeng.api.implementations.guiobjects.IGuiItem;
 import appeng.api.implementations.guiobjects.IGuiItemObject;
 import appeng.api.implementations.items.IAEWrench;
@@ -141,7 +141,10 @@ public class ToolNetworkTool extends AEBaseItem implements IGuiItem, IAEWrench, 
 			{
 				return false;
 			}
-
+			// TODO gamerforEA code start
+			if (EventUtils.cantInteract(p, hand, pos, side))
+				return false;
+			// TODO gamerforEA code end
 			final Block b = w.getBlockState( pos ).getBlock();
 			if( !p.isSneaking() )
 			{

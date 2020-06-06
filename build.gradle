@@ -61,6 +61,10 @@ version = aeversion + "-" + aechannel + "-" + aebuild
 group = aegroup
 archivesBaseName = aebasename
 
+dependencies {
+	compile name: 'EventHelper-1.12.2-2.6.2-dev'
+}
+
 // Add Coremod Manifest
 jar {
     manifest {

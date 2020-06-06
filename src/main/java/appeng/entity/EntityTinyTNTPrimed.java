@@ -40,7 +40,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-
+import com.gamerforea.ae.ModUtils;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import appeng.api.AEApi;
 import appeng.core.AEConfig;
 import appeng.core.AppEng;
@@ -48,12 +49,30 @@ import appeng.core.features.AEFeature;
 import appeng.core.sync.packets.PacketMockExplosion;
 import appeng.helpers.Reflected;
 import appeng.util.Platform;
+import net.minecraft.nbt.NBTTagCompound;
 
 
 public final class EntityTinyTNTPrimed extends EntityTNTPrimed implements IEntityAdditionalSpawnData
 {
 
 	private static final float SIZE = .5f;
+	// TODO gamerforEA code start
+	public final FakePlayerContainer fake = ModUtils.NEXUS_FACTORY.wrapFake(this);
+
+	@Override
+	protected void writeEntityToNBT(final NBTTagCompound compound)
+	{
+		super.writeEntityToNBT(compound);
+		this.fake.writeToNBT(compound);
+	}
+
+	@Override
+	protected void readEntityFromNBT(final NBTTagCompound compound)
+	{
+		super.readEntityFromNBT(compound);
+		this.fake.readFromNBT(compound);
+	}
+	// TODO gamerforEA code end
 
 	@Reflected
 	public EntityTinyTNTPrimed( final World w )
@@ -62,11 +81,15 @@ public final class EntityTinyTNTPrimed extends EntityTNTPrimed implements IEntit
 		this.setSize( SIZE, SIZE );
 	}
 
-	public EntityTinyTNTPrimed( final World w, final double x, final double y, final double z, final EntityLivingBase igniter )
+	public EntityTinyTNTPrimed(final World w, final double x, final double y, final double z, final EntityLivingBase igniter)
 	{
-		super( w, x, y, z, igniter );
-		this.setSize( SIZE, SIZE );
+		super(w, x, y, z, igniter);
+		this.setSize(SIZE, SIZE);
 		// this.yOffset = this.height / 2.0F;
+
+		// TODO gamerforEA code start
+		this.fake.setRealPlayer(igniter);
+		// TODO gamerforEA code end
 	}
 
 	/**
@@ -146,6 +169,10 @@ public final class EntityTinyTNTPrimed extends EntityTNTPrimed implements IEntit
 
 		for( final Entity e : list )
 		{
+			// TODO gamerforEA code start
+			if (this.fake.cantAttack(e))
+				continue;
+			// TODO gamerforEA code end
 			e.attackEntityFrom( DamageSource.causeExplosionDamage( ex ), 6 );
 		}
 
@@ -174,6 +201,10 @@ public final class EntityTinyTNTPrimed extends EntityTNTPrimed implements IEntit
 							{
 								if( block.getMaterial( state ) != Material.AIR )
 								{
+									// TODO gamerforEA code start
+									if (this.fake.cantBreak(point))
+										continue;
+									// TODO gamerforEA code end
 									if( block.canDropFromExplosion( ex ) )
 									{
 										block.dropBlockAsItemWithChance( this.world, point, state, 1.0F / 1.0f, 0 );

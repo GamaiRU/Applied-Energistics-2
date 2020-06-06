@@ -19,15 +19,12 @@
 package appeng.util.item;
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.NavigableMap;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import net.minecraftforge.oredict.OreDictionary;
-
+import com.gamerforea.ae.EventConfig;
 import appeng.api.config.FuzzyMode;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IItemList;
@@ -39,6 +36,10 @@ public final class ItemList implements IItemList<IAEItemStack>
 
 	private final NavigableMap<AESharedItemStack, IAEItemStack> records = new ConcurrentSkipListMap<>();
 
+	// TODO gamerforEA code start
+	private final Map<AESharedItemStack, IAEItemStack> unorderedRecords = EventConfig.useHybridItemList ? new ConcurrentHashMap<>() : this.records;
+	// TODO gamerforEA code end
+
 	@Override
 	public void add( final IAEItemStack option )
 	{
@@ -47,7 +48,10 @@ public final class ItemList implements IItemList<IAEItemStack>
 			return;
 		}
 
-		final IAEItemStack st = this.records.get( ( (AEItemStack) option ).getSharedStack() );
+		// TODO gamerforEA code replace, old code:
+		// final IAEItemStack st = this.records.get(((AEItemStack) option).getSharedStack());
+		final IAEItemStack st = this.unorderedRecords.get(((AEItemStack) option).getSharedStack());
+		// TODO gamerforEA code end
 
 		if( st != null )
 		{
@@ -68,7 +72,10 @@ public final class ItemList implements IItemList<IAEItemStack>
 			return null;
 		}
 
-		return this.records.get( ( (AEItemStack) itemStack ).getSharedStack() );
+		// TODO gamerforEA code replace, old code:
+		// return this.records.get(((AEItemStack) itemStack).getSharedStack());
+		return this.unorderedRecords.get(((AEItemStack) itemStack).getSharedStack());
+		// TODO gamerforEA code end
 	}
 
 	@Override
@@ -117,7 +124,10 @@ public final class ItemList implements IItemList<IAEItemStack>
 			return;
 		}
 
-		final IAEItemStack st = this.records.get( ( (AEItemStack) option ).getSharedStack() );
+		// TODO gamerforEA code replace, old code:
+		// final IAEItemStack st = this.records.get(((AEItemStack) option).getSharedStack());
+		final IAEItemStack st = this.unorderedRecords.get(((AEItemStack) option).getSharedStack());
+		// TODO gamerforEA code end
 
 		if( st != null )
 		{
@@ -143,7 +153,10 @@ public final class ItemList implements IItemList<IAEItemStack>
 			return;
 		}
 
-		final IAEItemStack st = this.records.get( ( (AEItemStack) option ).getSharedStack() );
+		// TODO gamerforEA code replace, old code:
+		// final IAEItemStack st = this.records.get(((AEItemStack) option).getSharedStack());
+		final IAEItemStack st = this.unorderedRecords.get(((AEItemStack) option).getSharedStack());
+		// TODO gamerforEA code end
 
 		if( st != null )
 		{
@@ -166,7 +179,10 @@ public final class ItemList implements IItemList<IAEItemStack>
 			return;
 		}
 
-		final IAEItemStack st = this.records.get( ( (AEItemStack) option ).getSharedStack() );
+		// TODO gamerforEA code replace, old code:
+		// final IAEItemStack st = this.records.get(((AEItemStack) option).getSharedStack());
+		final IAEItemStack st = this.unorderedRecords.get(((AEItemStack) option).getSharedStack());
+		// TODO gamerforEA code end
 
 		if( st != null )
 		{
@@ -202,6 +218,10 @@ public final class ItemList implements IItemList<IAEItemStack>
 	@Override
 	public Iterator<IAEItemStack> iterator()
 	{
+		// TODO gamerforEA code start
+		if (this.unorderedRecords != this.records)
+			return new MeaningfulItemHybridIterator<>(this.records, this.unorderedRecords);
+		// TODO gamerforEA code end
 		return new MeaningfulItemIterator<>( this.records.values().iterator() );
 	}
 
@@ -216,14 +236,87 @@ public final class ItemList implements IItemList<IAEItemStack>
 
 	private IAEItemStack putItemRecord( final IAEItemStack itemStack )
 	{
+		// TODO gamerforEA code start
+		AESharedItemStack sharedStack = ((AEItemStack) itemStack).getSharedStack();
+		if (this.unorderedRecords != this.records)
+			this.unorderedRecords.put(sharedStack, itemStack);
+		// TODO gamerforEA code end
 		return this.records.put( ( (AEItemStack) itemStack ).getSharedStack(), itemStack );
 	}
 
-	private Collection<IAEItemStack> findFuzzyDamage( final IAEItemStack filter, final FuzzyMode fuzzy, final boolean ignoreMeta )
+	private Collection<IAEItemStack> findFuzzyDamage(final IAEItemStack filter, final FuzzyMode fuzzy, final boolean ignoreMeta)
 	{
 		final AEItemStack itemStack = (AEItemStack) filter;
-		final Bounds bounds = itemStack.getSharedStack().getBounds( fuzzy, ignoreMeta );
+		final Bounds bounds = itemStack.getSharedStack().getBounds(fuzzy, ignoreMeta);
 
-		return this.records.subMap( bounds.lower(), true, bounds.upper(), true ).descendingMap().values();
+		Collection<IAEItemStack> values = this.records.subMap(bounds.lower(), true, bounds.upper(), true).descendingMap().values();
+
+		// TODO gamerforEA code start
+		if (this.unorderedRecords != this.records)
+			return Collections.unmodifiableCollection(values);
+		// TODO gamerforEA code start
+
+		return values;
 	}
+
+	// TODO gamerforEA code start
+	private static final class MeaningfulItemHybridIterator<T extends IAEItemStack> implements Iterator<T>
+	{
+		// private final Map<T, T> parentPrimary;
+		private final Iterator<Map.Entry<AESharedItemStack, T>> parentPrimaryIterator;
+		private final Map<AESharedItemStack, T> parentSecondary;
+		private Map.Entry<AESharedItemStack, T> next;
+
+		public MeaningfulItemHybridIterator(Map<AESharedItemStack, T> parentPrimary, Map<AESharedItemStack, T> parentSecondary)
+		{
+			// this.parentPrimary = parentPrimary;
+			this.parentPrimaryIterator = parentPrimary.entrySet().iterator();
+			this.parentSecondary = parentSecondary;
+		}
+
+		@Override
+		public boolean hasNext()
+		{
+			while (this.parentPrimaryIterator.hasNext())
+			{
+				this.next = this.parentPrimaryIterator.next();
+
+				T primaryValue = this.next.getValue();
+				if (primaryValue.isMeaningful())
+					return true;
+
+				this.parentPrimaryIterator.remove(); // self cleaning :3
+				T secondaryValue = this.parentSecondary.remove(this.next.getKey());
+
+				if (primaryValue != secondaryValue)
+					throw new IllegalStateException("ItemList collections has been desynchronized");
+			}
+
+			this.next = null;
+			return false;
+		}
+
+		@Override
+		public T next()
+		{
+			if (this.next == null)
+				throw new NoSuchElementException();
+			return this.next.getValue();
+		}
+
+		@Override
+		public void remove()
+		{
+			if (this.next == null)
+				throw new IllegalStateException();
+
+			T primaryValue = this.next.getValue();
+			this.parentPrimaryIterator.remove();
+			T secondaryValue = this.parentSecondary.remove(this.next.getKey());
+
+			if (primaryValue != secondaryValue)
+				throw new IllegalStateException("ItemList collections has been desynchronized");
+		}
+	}
+	// TODO gamerforEA code end
 }

@@ -32,6 +32,7 @@ import java.util.WeakHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import cofh.api.item.IToolHammer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -76,7 +77,7 @@ import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
-
+import com.gamerforea.eventhelper.util.EventUtils;
 import appeng.api.AEApi;
 import appeng.api.config.AccessRestriction;
 import appeng.api.config.Actionable;
@@ -696,9 +697,9 @@ public class Platform
 		return n == null ? "** Null" : n;
 	}
 
-	public static boolean isWrench( final EntityPlayer player, final ItemStack eq, final BlockPos pos )
+	public static boolean isWrench(final EntityPlayer player, final ItemStack eq, final BlockPos pos)
 	{
-		if( !eq.isEmpty() )
+		if (!eq.isEmpty())
 		{
 			try
 			{
@@ -711,20 +712,20 @@ public class Platform
 				 * }
 				 */
 
-				if( eq.getItem() instanceof cofh.api.item.IToolHammer )
-				{
-					return ( (cofh.api.item.IToolHammer) eq.getItem() ).isUsable( eq, player, pos );
-				}
+				if (eq.getItem() instanceof IToolHammer)
+					// TODO gamerforEA add condition [2]
+					return ((IToolHammer) eq.getItem()).isUsable(eq, player, pos) && !EventUtils.cantBreak(player, pos);
 			}
-			catch( final Throwable ignore )
+			catch (final Throwable ignore)
 			{ // explodes without BC
-
 			}
 
-			if( eq.getItem() instanceof IAEWrench )
+			if (eq.getItem() instanceof IAEWrench)
 			{
 				final IAEWrench wrench = (IAEWrench) eq.getItem();
-				return wrench.canWrench( eq, player, pos );
+
+				// TODO gamerforEA add condition [2]
+				return wrench.canWrench(eq, player, pos) && !EventUtils.cantBreak(player, pos);
 			}
 		}
 		return false;
